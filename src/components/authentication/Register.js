@@ -1,15 +1,43 @@
-import React from "react";
+import React,{useEffect} from "react";
 import { useFormik } from 'formik';
 import {userSchema} from "./registerIndex";
+import {useNavigate} from "react-router-dom"
 
-const onSubmit = async (values, actions) => {
-    console.log(values);
-    console.log(actions);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    actions.resetForm();
-};
+
 
 const Register=()=>{
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        return () => {
+            const auth = localStorage.getItem("user");
+            if(auth){
+                navigate("/");
+            }
+        };
+    });
+
+
+    const onSubmit = async (values, actions) => {
+        // console.log(values);
+        // console.log(actions);
+        let result = await fetch("http://localhost:5003/zerozilla/auth/registration",{
+            method:'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body:JSON.stringify(values),
+        });
+        result = await result.json();
+        if(result){
+            localStorage.setItem('user',JSON.stringify(result));
+            navigate("/");
+        }
+        // console.warn(result);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        actions.resetForm();
+    };
+
     const {
         values,
         errors,
@@ -29,7 +57,7 @@ const Register=()=>{
         onSubmit,
     });
 
-    console.log(errors);
+    // console.log(errors);
 
     return (
         <form onSubmit={handleSubmit} autoComplete="off">
